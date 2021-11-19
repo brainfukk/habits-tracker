@@ -1,0 +1,28 @@
+version: "3.3"
+
+services:
+  redis:
+    image: redis:latest
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Celery.Dockerfile
+    volumes:
+      - ./:/app
+    command: celery -A tgbot.celery_conf worker -B --loglevel=info
+    links:
+      - redis
+    depends_on:
+      - redis
+    restart: always
+
+  bot:
+    build:
+      context: .
+      dockerfile: docker/Bot.Dockerfile
+    volumes:
+      - ./:/app
+    env_file:
+      - .env
+    restart: always
